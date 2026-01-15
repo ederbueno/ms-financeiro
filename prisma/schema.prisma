@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model NotaFiscal {
+  id           String   @id @default(uuid())
+  chaveAcesso  String
+  xmlSimulado  String
+  faturaId     String   @unique
+  fatura       Fatura   @relation(fields: [faturaId], references: [id])
+  createdAt    DateTime @default(now())
+}
+
+model Fatura {
+  id         String      @id @default(uuid())
+  vendaId    String      @unique
+  valor      Float
+  createdAt  DateTime    @default(now())
+  notaFiscal NotaFiscal?
+  pagamento  Pagamento?
+}
+
+model Pagamento {
+  id               String          @id @default(uuid())
+  vendaId          String          @unique
+  valor            Float
+  metodo           MetodoPagamento
+  status           StatusPagamento @default(PENDENTE)
+  pagoEm           DateTime?
+  fatura           Fatura          @relation(fields: [faturaId], references: [id])
+  faturaId         String          @unique
+}
+
+//Dados de Pagamento
+
+enum MetodoPagamento {
+  PIX
+  BOLETO
+  LINK_MAQUININHA
+}
+
+enum StatusPagamento {
+  PENDENTE
+  PAGO
+  EXPIRADO
+  CANCELADO
+}
