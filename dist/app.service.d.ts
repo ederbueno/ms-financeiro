@@ -1,36 +1,61 @@
-import { ClientKafka } from '@nestjs/microservices';
 import { PrismaService } from './prisma.service';
 export declare class AppService {
     private prisma;
-    private readonly kafkaClient;
     private readonly logger;
-    constructor(prisma: PrismaService, kafkaClient: ClientKafka);
-    gerarFatura(data: any): Promise<void>;
-    private gerarDanfePDF;
-    cancelarFatura(data: any): Promise<void>;
+    constructor(prisma: PrismaService);
     gerarPagamento(dados: any): Promise<{
         vendaId: string;
         id: string;
+        faturaId: string;
         valor: number;
-        status: import("@prisma/client").$Enums.StatusPagamento;
-        createdAt: Date;
         metodo: import("@prisma/client").$Enums.MetodoPagamento;
-        urlPagamento: string | null;
-        pixCopiaECola: string | null;
+        status: import("@prisma/client").$Enums.StatusPagamento;
         pagoEm: Date | null;
-    } | undefined>;
+    }>;
+    gerarFatura(data: any): Promise<({
+        notaFiscal: {
+            id: string;
+            faturaId: string;
+            createdAt: Date;
+            chaveAcesso: string;
+            xmlSimulado: string;
+        } | null;
+    } & {
+        vendaId: string;
+        id: string;
+        valor: number;
+        createdAt: Date;
+    }) | undefined>;
     confirmarPagamento(vendaId: string): Promise<{
-        mensagem: string;
-        pagamento: {
+        sucesso: boolean;
+        dados: {
             vendaId: string;
             id: string;
+            faturaId: string;
             valor: number;
-            status: import("@prisma/client").$Enums.StatusPagamento;
-            createdAt: Date;
             metodo: import("@prisma/client").$Enums.MetodoPagamento;
-            urlPagamento: string | null;
-            pixCopiaECola: string | null;
+            status: import("@prisma/client").$Enums.StatusPagamento;
             pagoEm: Date | null;
         };
+    }>;
+    cancelarFatura(data: any): Promise<void>;
+    buscarStatusCompleto(vendaId: string): Promise<{
+        erro: string;
+        vendaId?: undefined;
+        faturaStatus?: undefined;
+        pagamentoStatus?: undefined;
+        conciliado?: undefined;
+        valor?: undefined;
+        metodo?: undefined;
+        pagoEm?: undefined;
+    } | {
+        vendaId: string;
+        faturaStatus: string;
+        pagamentoStatus: import("@prisma/client").$Enums.StatusPagamento;
+        conciliado: boolean;
+        valor: number;
+        metodo: import("@prisma/client").$Enums.MetodoPagamento;
+        pagoEm: Date | null;
+        erro?: undefined;
     }>;
 }
