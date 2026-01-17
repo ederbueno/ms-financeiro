@@ -14,7 +14,6 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppController = void 0;
 const common_1 = require("@nestjs/common");
-const microservices_1 = require("@nestjs/microservices");
 const app_service_1 = require("./app.service");
 let AppController = class AppController {
     appService;
@@ -24,17 +23,11 @@ let AppController = class AppController {
     async confirmar(vendaId) {
         return await this.appService.confirmarPagamento(vendaId);
     }
-    async handlePagamentoPendente(data) {
-        console.log(`📩 [Financeiro] Gerando link de pagamento para: ${data.vendaId}`);
-        await this.appService.gerarPagamento(data);
+    async getStatus(vendaId) {
+        return await this.appService.buscarStatusCompleto(vendaId);
     }
-    async handleLogisticaSucesso(data) {
-        console.log(`💰 [Financeiro] Capturando evento de venda concluída: ${data.vendaId}`);
-        await this.appService.gerarFatura(data);
-    }
-    async handleLogisticaErro(data) {
-        console.log(`⚠️ [Financeiro] Cancelando processo devido à falha logística: ${data.vendaId}`);
-        await this.appService.cancelarFatura(data);
+    health() {
+        return { status: 'ok', service: 'ms-financeiro' };
     }
 };
 exports.AppController = AppController;
@@ -46,28 +39,20 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AppController.prototype, "confirmar", null);
 __decorate([
-    (0, microservices_1.EventPattern)('venda_realizada'),
-    __param(0, (0, microservices_1.Payload)()),
+    (0, common_1.Get)('status/:vendaId'),
+    __param(0, (0, common_1.Param)('vendaId')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
-], AppController.prototype, "handlePagamentoPendente", null);
+], AppController.prototype, "getStatus", null);
 __decorate([
-    (0, microservices_1.EventPattern)('venda_concluida'),
-    __param(0, (0, microservices_1.Payload)()),
+    (0, common_1.Get)('health'),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], AppController.prototype, "handleLogisticaSucesso", null);
-__decorate([
-    (0, microservices_1.EventPattern)('logistica_falhou'),
-    __param(0, (0, microservices_1.Payload)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", Promise)
-], AppController.prototype, "handleLogisticaErro", null);
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "health", null);
 exports.AppController = AppController = __decorate([
-    (0, common_1.Controller)('financeiro'),
+    (0, common_1.Controller)('pagamento'),
     __metadata("design:paramtypes", [app_service_1.AppService])
 ], AppController);
 //# sourceMappingURL=app.controller.js.map

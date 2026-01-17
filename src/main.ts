@@ -1,27 +1,21 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const logger = new Logger('Bootstrap');
 
-  app.connectMicroservice<MicroserviceOptions>({
-    transport: Transport.KAFKA,
-    options: {
-      client: {
-        brokers: [process.env.KAFKA_BROKER || 'localhost:29092'],
-      },
-      consumer: {
-        groupId: 'financeiro-consumer-server',
-      },
-    },
+  // Enable CORS
+  app.enableCors({
+    origin: '*',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
   });
 
-  await app.startAllMicroservices();
-  await app.listen(3001);
+  const port = process.env.PORT || 3001;
+  await app.listen(port);
 
-  const logger = new (require('@nestjs/common').Logger)('Bootstrap');
-  logger.log('💰 Financeiro Híbrido (HTTP + KAFKA) pronto na porta 3001!');
-
+  logger.log(`💰 Financeiro (HTTP) pronto na porta ${port}!`);
 }
 bootstrap();
